@@ -1,0 +1,27 @@
+{
+  "base": {
+    "ea": "Examples\\MACD\\MACD Sample",
+    "symbol": "EURUSD",
+    "period": "M15",
+    "model": "everytick",
+    "opt": "off",
+    "date_from": "2024.01.01",
+    "date_to": "2024.03.01",
+    "replace_report": true,
+    "shutdown": true,
+    "inputs": {
+      "Lots": 0.1
+    }
+  },
+  "grid": {
+    "Risk": [
+      0.5,
+      1.0,
+      1.5
+    ],
+    "Reverse": [
+      false,
+      true
+    ]
+  }
+}

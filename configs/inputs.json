@@ -1,0 +1,11 @@
+{
+  "Lots": 0.1,
+  "Risk": {
+    "value": 1.0,
+    "start": 0.5,
+    "step": 0.5,
+    "stop": 5
+  },
+  "Reverse": false,
+  "OpenTime": "03:00"
+}
