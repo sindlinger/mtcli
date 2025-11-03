@@ -43,17 +43,31 @@ que eu monto e executo o plano agora.
 └─ inis/
 ```
 
+- Configure caminhos padrão uma vez:
+  - `mtcli config set terminal "C:\Program Files\MetaTrader\terminal64.exe"`
+  - `mtcli config set metaeditor "C:\Program Files\MetaTrader\MetaEditor64.exe"`
+  - `mtcli config set data_dir "C:\Users\...\MetaQuotes\Terminal\<id>"`
+  Depois disso, `mtcli detect` e os demais comandos usam esses valores automaticamente. 
+  **Novo**: ao definir `data_dir`, o CLI executa automaticamente o *bootstrap* (ver abaixo) e deixa o `CommandListenerEA` compilado na instância.
+
+- Bootstrap manual (caso queira rodar a qualquer momento): `python mtcli.py bootstrap [--force]`
+  - Cria/atualiza o `CommandListenerEA.mq5` e o script `AplicarTemplate.mq5` na instância ativa.
+  - Compila o EA (usa o `MetaEditor64.exe` configurado ou detectado).
+  - Garante pastas base (`MQL5\Files`, `MQL5\Profiles\Templates`) prontas para os demais comandos.
+
 ---
 
 ## 2) Comandos essenciais do `mtcli.py`
 
 - Detectar ambiente: `python mtcli.py detect`  
 - Perfil & abertura: `python mtcli.py profile create <Nome>`; `python mtcli.py open --symbol EURUSD --period M15 --template MeuTemplate.tpl`  
-- EA escutador:  
-  - instalar: `python mtcli.py listener install`  
-  - rodar: `python mtcli.py listener run --symbol EURUSD --period M15`  
-  - aplicar template: `python mtcli.py listener send apply-template --symbol EURUSD --period M15 --template MeuTemplate.tpl`  
-  - anexar indicador: `python mtcli.py listener send attach-indicator --symbol EURUSD --period H1 --indicator Examples\Heiken_Ashi --subwindow 0`  
+- EA escutador e comandos de gráfico (terminal aberto):  
+  - `python mtcli.py listener install` (rebuilde forçado; opcional após `bootstrap`).  
+  - `python mtcli.py listener run --symbol EURUSD --period H1` abre o MT5 já com o `CommandListenerEA` anexado.  
+  - `python mtcli.py chart indicator attach --symbol EURUSD --period H1 --indicator GPU_PhaseViz_Gen4 --subwindow 0`  
+  - `python mtcli.py chart indicator detach --symbol EURUSD --period H1 --indicator GPU_PhaseViz_Gen4`  
+  - `python mtcli.py chart send "ATTACH_EA;EURUSD;H1;CommandListenerEA"` (payload livre para ações não mapeadas).  
+  Todas as operações usam `MQL5\Files\cmd.txt`; o bootstrap garante que a pasta exista e o EA esteja compilado.
 - Strategy Tester:  
   - visual: `python mtcli.py tester run --ea <EA> --symbol EURUSD --period M1 --model everytick --visual --date-from 2024.01.01 --date-to 2024.06.01 --report \reports\run_{ts}.htm --replace-report --shutdown`  
   - otimização: `python mtcli.py tester run --ea <EA> --symbol EURUSD --period M15 --model everytick --opt fast --criterion complex --forward custom --forward-date 2024.04.01 --use-local --use-cloud --report \reports\opt_{ts}.xml --replace-report --shutdown`  
@@ -65,8 +79,8 @@ que eu monto e executo o plano agora.
 
 ## 3) Playbooks
 
-**PB‑01 – Bootstrap**: `detect` → ajustar caminhos → criar pastas → abrir MT5 com template.  
-**PB‑02 – EA escutador**: install → run → send (apply-template/attach-indicator).  
+**PB‑01 – Bootstrap**: `config set ...` (ou `bootstrap`) → confirmar `listener.ini` → abrir MT5 com `listener run`.  
+**PB‑02 – EA escutador**: `listener run` (se necessário) → `chart indicator attach` / `chart send ...`.  
 **PB‑03 – Visual**: `tester run --visual` + relatório.  
 **PB‑04 – Otimização**: `--opt fast` + `--criterion` + `--forward`.  
 **PB‑05 – Inputs JSON**: `--inputs-json` para `[TesterInputs]`.  
